@@ -13,7 +13,9 @@ class Main extends Component {
       openWithPlaying: this.props.settingOpenWithPlaying,
       restoreLastWinPos: this.props.settingRestoreLastWinPos,
       hideAbout: this.props.hideAbout,
-      openPattern: this.props.openPattern
+      openPattern: this.props.openPattern,
+      compactStatusBar: this.props.compactStatusBar,
+      preferBitRate: this.props.preferBitRate,
     }
   }
 
@@ -39,25 +41,38 @@ class Main extends Component {
 
   handleOpenWithPlayingState = () => {
     this.setState({
-      openWithPlaying: !this.state.openWithPlaying
+      openWithPlaying: !this.state.openWithPlaying,
     })
   }
 
   handleRestorelastWinPosState = () => {
     this.setState({
-      restoreLastWinPos: !this.state.restoreLastWinPos
+      restoreLastWinPos: !this.state.restoreLastWinPos,
     })
   }
 
   handleHideAbout = () => {
     this.setState({
-      hideAbout: !this.state.hideAbout
+      hideAbout: !this.state.hideAbout,
     })
   }
 
   handleSelectInitialPattern = (e, data) => {
     this.setState({
-      openPattern: data.value
+      openPattern: data.value,
+    })
+  }
+
+  handleCompactStausBar = () => {
+    const val = !this.state.compactStatusBar
+    this.setState({
+      compactStatusBar: val,
+    })
+  }
+
+  handlePreferBitRate = (e, data) => {
+    this.setState({
+      preferBitRate: data.value,
     })
   }
 
@@ -66,18 +81,20 @@ class Main extends Component {
   }
 
   render() {
-    const { _id, saveSuccess } = this.props
+    const { _id, saveSuccess, userInfo } = this.props
     const {
       volume,
       openWithPlaying,
       restoreLastWinPos,
       hideAbout,
-      openPattern
+      openPattern,
+      compactStatusBar,
+      preferBitRate,
     } = this.state
 
     const patternOptions = [
       { key: 'select', text: '豆瓣精选 MHz', value: 'select' },
-      { key: 'personal', text: '我的私人 MHz', value: 'personal' }
+      { key: 'personal', text: '我的私人 MHz', value: 'personal' },
     ]
 
     return (
@@ -91,23 +108,30 @@ class Main extends Component {
         <Header as="h5">播放设置：</Header>
         <div>
           <div>
-            <Checkbox
-              label="打开后自动播放"
-              onChange={this.handleOpenWithPlayingState}
-              checked={openWithPlaying}
-            />
+            <Checkbox label="打开后自动播放" onChange={this.handleOpenWithPlayingState} checked={openWithPlaying} />
           </div>
           {_id === 1 && (
             <div>
-              <div style={{ margin: '8px 0' }}>初始模式：</div>
-              <Select
-                value={openPattern}
-                options={patternOptions}
-                onChange={this.handleSelectInitialPattern}
-              />
+              <div style={{ margin: '4px 0' }}>初始模式：</div>
+              <Select value={openPattern} options={patternOptions} onChange={this.handleSelectInitialPattern} />
             </div>
           )}
         </div>
+        {userInfo.pro_status && userInfo.pro_status === 'S' && (
+          <div>
+            <div style={{ margin: '4px 0' }}>首选音质：</div>
+            <Select
+              placeholder="首选音质"
+              value={preferBitRate}
+              options={[
+                { key: '128', value: '128', text: '中等音质 (128k)' },
+                { key: '192', value: '192', text: '高音质 (192k)' },
+                { key: '320', value: '320', text: '最佳音质 (320k)' },
+              ]}
+              onChange={this.handlePreferBitRate}
+            />
+          </div>
+        )}
         <Header as="h5">其他设置: </Header>
         <div>
           <div>
@@ -118,30 +142,18 @@ class Main extends Component {
             />
           </div>
           <div>
-            <Checkbox
-              label="隐藏关于界面"
-              onChange={this.handleHideAbout}
-              checked={hideAbout}
-            />
+            <Checkbox label="隐藏关于界面" onChange={this.handleHideAbout} checked={hideAbout} />
+          </div>
+          <div>
+            <Checkbox label="精简状态栏" onChange={this.handleCompactStausBar} checked={compactStatusBar} />
           </div>
         </div>
         {saveSuccess && (
-          <Message
-            size="small"
-            positive
-            onDismiss={this.props.handleSaveSuccessReset}
-          >
+          <Message size="small" positive onDismiss={this.props.handleSaveSuccessReset}>
             保存成功
           </Message>
         )}
-        <Button
-          className="save"
-          content="保存"
-          fluid
-          color="green"
-          size="tiny"
-          onClick={this.handleSettingStore}
-        />
+        <Button className="save" content="保存" fluid color="green" size="tiny" onClick={this.handleSettingStore} />
       </div>
     )
   }
@@ -156,25 +168,28 @@ Main.propTypes = {
   settingOpenWithPlaying: PropTypes.bool,
   settingRestoreLastWinPos: PropTypes.bool,
   hideAbout: PropTypes.bool,
-  openPattern: PropTypes.string
+  openPattern: PropTypes.string,
+  compactStatusBar: PropTypes.bool,
+  userInfo: PropTypes.any,
+  preferBitRate: PropTypes.string,
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   _id: state.authReducer._id,
   saveSuccess: state.settingReducer.saveSuccess,
   audioVolume: state.settingReducer.volume,
   settingOpenWithPlaying: state.settingReducer.openWithPlaying,
   settingRestoreLastWinPos: state.settingReducer.restoreLastWinPos,
   hideAbout: state.settingReducer.hideAbout,
-  openPattern: state.settingReducer.openPattern
+  openPattern: state.settingReducer.openPattern,
+  compactStatusBar: state.settingReducer.compactStatusBar,
+  userInfo: state.authReducer.userInfo,
+  preferBitRate: state.settingReducer.preferBitRate,
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   handleSaveSuccessReset: () => dispatch(settingSaveSuccessReset()),
-  handleSettingStore: state => dispatch(settingStore(state))
+  handleSettingStore: (state) => dispatch(settingStore(state)),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Main)
+export default connect(mapStateToProps, mapDispatchToProps)(Main)

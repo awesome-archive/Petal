@@ -1,33 +1,43 @@
 import * as types from './types'
 
-const audioVolumeSet = volume => ({
+const audioVolumeSet = (volume) => ({
   type: types.AUDIO_VOLUME_SET,
-  volume
+  volume,
 })
 
-const openWithPlayingSet = bool => ({
+const openWithPlayingSet = (bool) => ({
   type: types.OPEN_WITH_PLAYING_SET,
-  openWithPlaying: bool
+  openWithPlaying: bool,
 })
 
-const restoreLastWinPosSet = bool => ({
+const restoreLastWinPosSet = (bool) => ({
   type: types.RESTORE_LAST_WIN_POS,
-  restoreLastWinPos: bool
+  restoreLastWinPos: bool,
 })
 
-const hideAboutSet = bool => ({
+const hideAboutSet = (bool) => ({
   type: types.HIDE_ABOUT,
-  hideAbout: bool
+  hideAbout: bool,
 })
 
-const openPatternSet = pattern => ({
+const openPatternSet = (pattern) => ({
   type: types.OPEN_PATTERN,
-  openPattern: pattern
+  openPattern: pattern,
+})
+
+const compactStatusBarSet = (pattern) => ({
+  type: types.COMPACT_STATUS_BAR,
+  compactStatusBar: pattern,
+})
+
+const preferBitRateSet = (bitRate) => ({
+  type: types.PREFER_BIT_RATE,
+  preferBitRate: bitRate,
 })
 
 const settingSaveSuccess = () => ({ type: types.SETTING_SAVE_SUCCESS })
 const settingSaveSuccessReset = () => ({
-  type: types.SETTING_SAVE_SUCCESS_RESET
+  type: types.SETTING_SAVE_SUCCESS_RESET,
 })
 
 export {
@@ -36,6 +46,8 @@ export {
   restoreLastWinPosSet,
   hideAboutSet,
   openPatternSet,
+  compactStatusBarSet,
+  preferBitRateSet,
   settingSaveSuccess,
-  settingSaveSuccessReset
+  settingSaveSuccessReset,
 }

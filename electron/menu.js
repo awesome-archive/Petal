@@ -1,8 +1,27 @@
-import { app, Menu } from 'electron'
+import { Menu, app } from 'electron'
 
+import { isDarwin } from './platform'
 import { mainWindow } from './win'
 
 const template = [
+  ...(isDarwin
+    ? [
+        {
+          label: app.name,
+          submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'services' },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideothers' },
+            { role: 'unhide' },
+            { type: 'separator' },
+            { role: 'quit' },
+          ],
+        },
+      ]
+    : []),
   {
     label: 'Edit',
     submenu: [
@@ -12,95 +31,102 @@ const template = [
       { role: 'cut' },
       { role: 'copy' },
       { role: 'paste' },
-      { role: 'delete' },
-      { role: 'selectall' }
-    ]
+      ...(isDarwin
+        ? [
+            { role: 'pasteAndMatchStyle' },
+            { role: 'delete' },
+            { role: 'selectAll' },
+            { type: 'separator' },
+            {
+              label: 'Speech',
+              submenu: [{ role: 'startspeaking' }, { role: 'stopspeaking' }],
+            },
+          ]
+        : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }]),
+    ],
   },
   {
     label: 'View',
     submenu: [
       { role: 'reload' },
       { role: 'forcereload' },
-      { role: 'toggledevtools' }
-    ]
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
   },
   {
     label: 'Window',
-    submenu: [{ role: 'minimize' }]
+    submenu: [
+      { role: 'minimize' },
+      { role: 'zoom' },
+      ...(isDarwin ? [{ type: 'separator' }, { role: 'front' }] : [{ role: 'close' }]),
+    ],
   },
   {
-    label: 'Operation',
+    label: 'Operations',
     submenu: [
       {
         label: 'Pause',
         accelerator: 'Space',
         click() {
           mainWindow.webContents.send('pause')
-        }
+        },
       },
       {
         label: 'Love',
         accelerator: 'CmdOrCtrl+l',
         click() {
           mainWindow.webContents.send('love')
-        }
+        },
       },
       {
         label: 'Skip',
         accelerator: 'CmdOrCtrl+k',
         click() {
           mainWindow.webContents.send('skip')
-        }
+        },
       },
       {
         label: 'Trash',
         accelerator: 'CmdOrCtrl+t',
         click() {
           mainWindow.webContents.send('trash')
-        }
+        },
       },
       {
         label: 'Forward',
         accelerator: 'CmdOrCtrl+Right',
         click() {
           mainWindow.webContents.send('forward')
-        }
+        },
       },
       {
         label: 'Backward',
         accelerator: 'CmdOrCtrl+Left',
         click() {
           mainWindow.webContents.send('backward')
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   {
-    label: 'Related',
+    label: 'Help',
     submenu: [
       {
-        label: 'Source Code Repo',
+        label: 'Source Code Repository',
         click() {
-          require('electron').shell.openExternal('https://github.com/ilime')
-        }
+          require('electron').shell.openExternal('https://github.com/ilime/Petal')
+        },
       },
-      { type: 'separator' },
-      {
-        label: 'About Author',
-        click() {
-          require('electron').shell.openExternal('https://github.com/g1eny0ung')
-        }
-      }
-    ]
-  }
+    ],
+  },
 ]
 
 export default function createMenu() {
-  if (process.platform === 'darwin') {
-    template.unshift({
-      label: app.getName(),
-      submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'quit' }]
-    })
-  }
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-import { NavLink } from 'react-router-dom'
+import { Menu } from 'semantic-ui-react'
 import { Sidebar } from '../components/Sidebar/index.jsx'
 
 describe('<Sidebar />', () => {
@@ -16,30 +16,25 @@ describe('<Sidebar />', () => {
     '/recentList',
     '/trashList',
     '/setting',
-    'about',
-    '/personal'
+    '/about',
+    '/personal',
   ]
 
   test('navlink worked as expectly', () => {
     let index = 0
-    wrapper.find(NavLink).forEach(l => {
+    wrapper.find(Menu.Item).forEach((l) => {
       expect(l.props().to).toBe(withoutAuthRoutes[index++])
     })
   })
 
   test('navlink active class', () => {
-    expect(
-      wrapper
-        .find(NavLink)
-        .first()
-        .props().activeClassName
-    ).toBe('selected')
+    expect(wrapper.find(Menu.Item).first().props().activeClassName).toBe('active')
   })
 
   test('after login, navlink change', () => {
     let wrapperWithId = shallow(<Sidebar _id={1} />)
     let index = 0
-    wrapperWithId.find(NavLink).forEach(l => {
+    wrapperWithId.find(Menu.Item).forEach((l) => {
       expect(l.props().to).toMatch(authRoutes[index++])
     })
   })

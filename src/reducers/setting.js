@@ -1,56 +1,42 @@
-import cond, { shallowCopyHelper as _sch } from 'redux-cond'
 import * as types from '../actions/setting/types'
 
 const settingReducer = (
   state = {
     mainVersion: 2,
-    secondaryVersion: 18,
+    secondaryVersion: 25,
     volume: 20,
     openWithPlaying: true,
     restoreLastWinPos: false,
     hideAbout: false,
     openPattern: 'select',
-    saveSuccess: false
+    compactStatusBar: false,
+    preferBitRate: '128',
+    saveSuccess: false,
   },
   action
 ) => {
-  return cond(
-    types.AUDIO_VOLUME_SET,
-    (state, action) =>
-      _sch(state, {
-        volume: action.volume
-      }),
-    types.OPEN_WITH_PLAYING_SET,
-    (state, action) =>
-      _sch(state, {
-        openWithPlaying: action.openWithPlaying
-      }),
-    types.RESTORE_LAST_WIN_POS,
-    (state, action) =>
-      _sch(state, {
-        restoreLastWinPos: action.restoreLastWinPos
-      }),
-    types.HIDE_ABOUT,
-    (state, action) =>
-      _sch(state, {
-        hideAbout: action.hideAbout
-      }),
-    types.OPEN_PATTERN,
-    (state, action) =>
-      _sch(state, {
-        openPattern: action.openPattern
-      }),
-    types.SETTING_SAVE_SUCCESS,
-    state =>
-      _sch(state, {
-        saveSuccess: true
-      }),
-    types.SETTING_SAVE_SUCCESS_RESET,
-    state =>
-      _sch(state, {
-        saveSuccess: false
-      })
-  )(state, action)
+  switch (action.type) {
+    case types.AUDIO_VOLUME_SET:
+      return { ...state, volume: action.volume }
+    case types.OPEN_WITH_PLAYING_SET:
+      return { ...state, openWithPlaying: action.openWithPlaying }
+    case types.RESTORE_LAST_WIN_POS:
+      return { ...state, restoreLastWinPos: action.restoreLastWinPos }
+    case types.HIDE_ABOUT:
+      return { ...state, hideAbout: action.hideAbout }
+    case types.OPEN_PATTERN:
+      return { ...state, openPattern: action.openPattern }
+    case types.COMPACT_STATUS_BAR:
+      return { ...state, compactStatusBar: action.compactStatusBar }
+    case types.PREFER_BIT_RATE:
+      return { ...state, preferBitRate: action.preferBitRate }
+    case types.SETTING_SAVE_SUCCESS:
+      return { ...state, saveSuccess: true }
+    case types.SETTING_SAVE_SUCCESS_RESET:
+      return { ...state, saveSuccess: false }
+    default:
+      return state
+  }
 }
 
 export default settingReducer

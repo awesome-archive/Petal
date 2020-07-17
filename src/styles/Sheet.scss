@@ -1,22 +1,24 @@
 .petal-sheet {
   padding: 5px 10px;
-  height: calc(100vh - 24px);
+  height: calc(100% - 24px);
   overflow-y: scroll;
 
-  .daily-image {
-    img {
-      width: 250px !important;
-      height: 250px !important;
+  .daily-play {
+    position: absolute;
+    top: 32px;
+    right: 25px;
+    cursor: pointer;
+
+    &:hover {
+      color: $petal-green;
     }
+  }
 
-    a.ui.right.corner.label {
-      i {
-        cursor: pointer;
-      }
+  .ui.items:not(.unstackable) > .item > .image.daily-cover {
+    max-height: none !important;
 
-      &:hover {
-        color: $petal-green;
-      }
+    > img {
+      max-height: none !important;
     }
   }
 }

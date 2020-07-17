@@ -1,51 +1,81 @@
 import { BrowserWindow } from 'electron'
-import url from 'url'
 import db from './db'
+import { isDarwin, isPlasma } from './platform'
+import url from 'url'
 
 export let mainWindow = null
 
+export let mainWindowProps = {
+  width: 330,
+  height: 330,
+  minWidth: 330,
+  minHeight: 330,
+  maxWidth: 430,
+  maxHeight: 800,
+  resizable: true,
+  frame: false,
+  show: false,
+  webPreferences: {
+    nodeIntegration: true,
+    webSecurity: false,
+  },
+}
+
+export let mainWindowPropsLoadingFinish = {
+  width: 330,
+  height: 500,
+  minWidth: 330,
+  minHeight: 500,
+}
+
+const plasmaWindowProps = {
+  transparent: true,
+  width: mainWindowProps.width + 15 * 2,
+  height: mainWindowProps.height + 15 * 2,
+}
+
+const plasmaWindowPropsLoadingFinish = {
+  width: mainWindowPropsLoadingFinish.width + 15 * 2,
+  height: mainWindowPropsLoadingFinish.height + 15 * 2,
+}
+
 export const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 330,
-    height: 330,
-    resizable: false,
-    frame: false,
-    show: false,
-    webPreferences: {
-      nodeIntegration: true,
-      webSecurity: false
-    }
-  })
-
-  mainWindow.loadURL(
-    process.env.NODE_ENV === 'development'
-      ? url.format('http://localhost:3000')
-      : url.format({
-          pathname: __dirname + '/index.html',
-          protocol: 'file:'
-        })
-  )
-
-  if (process.env.NODE_ENV === 'development') {
-    const {
-      default: installer,
-      REACT_DEVELOPER_TOOLS,
-      REDUX_DEVTOOLS
-    } = require('electron-devtools-installer')
-    /* eslint-disable */
-    Promise.all([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS].map(installer))
-      .then(() => {
-        console.log('install dev tools successfully')
-      })
-      .catch(console.log)
-    /* eslint-enable */
-    mainWindow.webContents.openDevTools()
+  let delay = 0
+  if (isPlasma) {
+    Object.assign(mainWindowProps, plasmaWindowProps)
+    Object.assign(mainWindowPropsLoadingFinish, plasmaWindowPropsLoadingFinish)
+    delay = 300
   }
+  // For the reason of delay, see https://github.com/electron/electron/issues/16809
 
-  mainWindow.once('ready-to-show', () => {
-    setWindowPostionFromDB()
-    mainWindow.show()
-  })
+  setTimeout(() => {
+    mainWindow = new BrowserWindow(mainWindowProps)
+    mainWindow.loadURL(
+      process.env.NODE_ENV === 'development'
+        ? url.format('http://localhost:3000')
+        : url.format({
+            pathname: __dirname + '/index.html',
+            protocol: 'file:',
+          })
+    )
+
+    if (process.env.NODE_ENV === 'development') {
+      const { default: installer, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = require('electron-devtools-installer')
+      /* eslint-disable */
+      Promise.all([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS].map(installer))
+        .then(() => {
+          console.log('install dev tools successfully')
+        })
+        .catch(console.log)
+      /* eslint-enable */
+      mainWindow.webContents.openDevTools()
+    }
+
+    mainWindow.once('ready-to-show', () => {
+      setWindowPostionFromDB()
+      mainWindow.show()
+    })
+  }, delay)
 }
 
 function getCurrentWindowPostion() {
@@ -58,7 +88,7 @@ export function setWindowPostionFromDB() {
       if (doc.restoreLastWinPos) {
         db.findOne({ window: 'position' }, (err, doc) => {
           if (doc != null) {
-            mainWindow.setPosition(doc.pos[0], doc.pos[1])
+            mainWindow.setPosition(doc.pos[0], doc.pos[1], isDarwin ? true : undefined)
           }
         })
       }
@@ -67,21 +97,17 @@ export function setWindowPostionFromDB() {
 }
 
 export function saveCurrentWindowPosition() {
-  db.findOne({ window: 'position' }, (err, doc) => {
-    if (doc !== null) {
-      db.update(
-        { window: 'position' },
-        {
-          $set: {
-            pos: getCurrentWindowPostion()
-          }
-        }
-      )
-    } else {
-      db.insert({
-        window: 'position',
-        pos: getCurrentWindowPostion()
-      })
+  db.update(
+    {
+      window: 'position',
+    },
+    {
+      window: 'position',
+      pos: getCurrentWindowPostion(),
+    },
+    {
+      multi: false,
+      upsert: true,
     }
-  })
+  )
 }

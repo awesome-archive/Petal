@@ -1,10 +1,11 @@
+import { Header, Icon, Item } from 'semantic-ui-react'
 import React, { Component } from 'react'
+
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Header, Item } from 'semantic-ui-react'
-import { songLyricGET } from '../../actions/fm/apis'
 import { dailyPattern } from '../../actions/fm/actions'
 import { rendererProcessSend } from '../../helper/electron'
+import { songLyricGET } from '../../actions/fm/apis'
 
 class Sheet extends Component {
   componentDidMount() {
@@ -25,7 +26,7 @@ class Sheet extends Component {
 
   handleDailyPlay = () => {
     if (this.props.pattern !== 'daily') {
-      rendererProcessSend('touchBarResetPause')
+      rendererProcessSend('FMResetPause')
       rendererProcessSend('patternSwitch', 'daily')
     }
     this.props.switchToDailyPattern()
@@ -39,19 +40,11 @@ class Sheet extends Component {
     return (
       <article className="petal-sheet">
         <Header as="h2">歌单</Header>
+        <Icon className="daily-play" name="play" link onClick={this.handleDailyPlay} />
         <Item.Group divided>
           {_id === 1 && (
             <Item>
-              <Item.Image
-                className="daily-image"
-                src={daily.songs[0].picture}
-                label={{
-                  as: 'a',
-                  corner: 'right',
-                  icon: 'play',
-                  onClick: this.handleDailyPlay
-                }}
-              />
+              <Item.Image className="daily-cover" src={daily.songs[0].picture} />
               <Item.Content>
                 <Item.Header>{daily.title}</Item.Header>
                 <Item.Meta>由{daily.creator.name}创建</Item.Meta>
@@ -70,26 +63,23 @@ Sheet.propTypes = {
   pattern: PropTypes.string,
   daily: PropTypes.object,
   lyricGlobalDisplay: PropTypes.bool,
-  handleSongLyricGET: PropTypes.func
+  handleSongLyricGET: PropTypes.func,
   // switchToSheetPattern: PropTypes.func,
   // handleSheetSet: PropTypes.func
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   _id: state.authReducer._id,
   pattern: state.fmReducer.pattern,
   daily: state.fmReducer.daily,
-  lyricGlobalDisplay: state.fmReducer.lyricDisplay
+  lyricGlobalDisplay: state.fmReducer.lyricDisplay,
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   switchToDailyPattern: () => dispatch(dailyPattern()),
-  handleSongLyricGET: () => dispatch(songLyricGET())
+  handleSongLyricGET: () => dispatch(songLyricGET()),
   // switchToSheetPattern: () => dispatch(sheetPattern()),
   // handleSheetSet: list => dispatch(sheetSet(list))
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Sheet)
+export default connect(mapStateToProps, mapDispatchToProps)(Sheet)

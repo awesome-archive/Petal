@@ -1,4 +1,3 @@
-import cond, { shallowCopyHelper as _sch } from 'redux-cond'
 import {
   AUTH_LOGIN_REQUEST,
   AUTH_LOGIN_RESPONSE,
@@ -6,7 +5,7 @@ import {
   AUTH_REMOVE_FAIL_MESSAGE,
   AUTH_TOKEN_LOAD,
   AUTH_LOGOUT,
-  USER_INFO
+  USER_INFO,
 } from '../actions/auth/types'
 
 const authReducer = (
@@ -16,55 +15,28 @@ const authReducer = (
     loginFailMessage: '',
     _id: 0, // if _id === 1, use is login
     userToken: {},
-    userInfo: {}
+    userInfo: {},
   },
   action
 ) => {
-  return cond(
-    AUTH_LOGIN_REQUEST,
-    state =>
-      _sch(state, {
-        isFetching: true
-      }),
-    AUTH_LOGIN_RESPONSE,
-    (state, action) =>
-      _sch(state, {
-        isFetching: false,
-        _id: action._id,
-        userToken: action.userToken
-      }),
-    AUTH_LOGIN_FAIL,
-    (state, action) =>
-      _sch(state, {
-        isFetching: false,
-        loginFail: true,
-        loginFailMessage: action.message
-      }),
-    AUTH_REMOVE_FAIL_MESSAGE,
-    state =>
-      _sch(state, {
-        loginFail: false,
-        loginFailMessage: ''
-      }),
-    AUTH_TOKEN_LOAD,
-    state =>
-      _sch(state, {
-        _id: action._id,
-        userToken: action.userToken
-      }),
-    AUTH_LOGOUT,
-    state =>
-      _sch(state, {
-        _id: 0,
-        userToken: {},
-        userInfo: {}
-      }),
-    USER_INFO,
-    (state, action) =>
-      _sch(state, {
-        userInfo: action.userInfo
-      })
-  )(state, action)
+  switch (action.type) {
+    case AUTH_LOGIN_REQUEST:
+      return { ...state, isFetching: true }
+    case AUTH_LOGIN_RESPONSE:
+      return { ...state, isFetching: false, _id: action._id, userToken: action.userToken }
+    case AUTH_LOGIN_FAIL:
+      return { ...state, isFetching: false, loginFail: true, loginFailMessage: action.message }
+    case AUTH_REMOVE_FAIL_MESSAGE:
+      return { ...state, loginFail: false, loginFailMessage: '' }
+    case AUTH_TOKEN_LOAD:
+      return { ...state, _id: action._id, userToken: action.userToken }
+    case AUTH_LOGOUT:
+      return { ...state, _id: 0, userToken: {}, userInfo: {} }
+    case USER_INFO:
+      return { ...state, userInfo: action.userInfo }
+    default:
+      return state
+  }
 }
 
 export default authReducer

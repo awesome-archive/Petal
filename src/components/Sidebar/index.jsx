@@ -1,92 +1,60 @@
+import { Icon, Image, Menu } from 'semantic-ui-react'
+import { NavLink, withRouter } from 'react-router-dom'
 import React, { Component } from 'react'
+
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Icon, Image } from 'semantic-ui-react'
-import { NavLink, withRouter } from 'react-router-dom'
-import { appMinimize, appQuit } from '../../helper/electron'
 
 export class Sidebar extends Component {
   render() {
     const { _id, avatar, hideAbout } = this.props
 
     return (
-      <nav className="petal-sidebar">
-        <section className="petal-app-control">
-          <div>
-            <span className="quit" onClick={appQuit} title="关闭" />
-          </div>
-          <div>
-            <span className="hide" onClick={appMinimize} title="最小化" />
-          </div>
-        </section>
-        <ul className="petal-sidebar-itemlist">
-          <li>
-            <NavLink exact to="/" activeClassName="selected">
-              <Icon name="leaf" size="large" color="grey" />
-            </NavLink>
-          </li>
-          <li>
-            <NavLink exact to="/pattern" activeClassName="selected">
-              <Icon name="options" size="large" color="grey" />
-            </NavLink>
-          </li>
-          {_id === 1 && (
-            <li>
-              <NavLink exact to="/sheet" activeClassName="selected">
-                <Icon name="lab" size="large" color="grey" />
-              </NavLink>
-            </li>
-          )}
-          {_id === 1 && (
-            <li>
-              <NavLink exact to="/redHeartList" activeClassName="selected">
-                <Icon name="heart outline" size="large" color="grey" />
-              </NavLink>
-            </li>
-          )}
-          {_id === 1 && (
-            <li>
-              <NavLink exact to="/recentList" activeClassName="selected">
-                <Icon name="history" size="large" color="grey" />
-              </NavLink>
-            </li>
-          )}
-          {_id === 1 && (
-            <li>
-              <NavLink exact to="/trashList" activeClassName="selected">
-                <Icon
-                  name="trash alternate outline"
-                  size="large"
-                  color="grey"
-                />
-              </NavLink>
-            </li>
-          )}
-          <li>
-            <NavLink exact to="/setting" activeClassName="selected">
-              <Icon name="setting" size="large" color="grey" />
-            </NavLink>
-          </li>
-          {!hideAbout && (
-            <li>
-              <NavLink exact to="/about" activeClassName="selected">
-                <Icon name="idea" size="large" color="grey" />
-              </NavLink>
-            </li>
-          )}
-          <li className="auth">
-            {_id === 0 ? (
-              <NavLink to="/login" activeClassName="selected">
-                <Icon name="user circle" size="large" color="grey" />
-              </NavLink>
-            ) : (
-              <NavLink to="/personal" activeClassName="selected">
-                <Image src={avatar} avatar />
-              </NavLink>
-            )}
-          </li>
-        </ul>
-      </nav>
+      <Menu className="petal-sidebar" vertical icon secondary pointing>
+        <Menu.Item as={NavLink} exact to="/" activeClassName="active">
+          <Icon name="leaf" size="large" color="grey" />
+        </Menu.Item>
+        <Menu.Item as={NavLink} exact to="/pattern" activeClassName="active">
+          <Icon name="options" size="large" color="grey" />
+        </Menu.Item>
+        {_id === 1 && (
+          <Menu.Item as={NavLink} exact to="/sheet" activeClassName="active">
+            <Icon name="lab" size="large" color="grey" />
+          </Menu.Item>
+        )}
+        {_id === 1 && (
+          <Menu.Item as={NavLink} exact to="/redHeartList" activeClassName="active">
+            <Icon name="heart outline" size="large" color="grey" />
+          </Menu.Item>
+        )}
+        {_id === 1 && (
+          <Menu.Item as={NavLink} exact to="/recentList" activeClassName="active">
+            <Icon name="history" size="large" color="grey" />
+          </Menu.Item>
+        )}
+        {_id === 1 && (
+          <Menu.Item as={NavLink} exact to="/trashList" activeClassName="active">
+            <Icon name="trash alternate outline" size="large" color="grey" />
+          </Menu.Item>
+        )}
+        <Menu.Item as={NavLink} exact to="/setting" activeClassName="active">
+          <Icon name="setting" size="large" color="grey" />
+        </Menu.Item>
+        {!hideAbout && (
+          <Menu.Item as={NavLink} exact to="/about" activeClassName="active">
+            <Icon name="question circle outline" size="large" color="grey" />
+          </Menu.Item>
+        )}
+        {_id === 0 ? (
+          <Menu.Item as={NavLink} to="/login" activeClassName="active" id="auth">
+            <Icon name="user circle" size="large" color="grey" />
+          </Menu.Item>
+        ) : (
+          <Menu.Item as={NavLink} to="/personal" activeClassName="active" id="auth">
+            <Image src={avatar} avatar />
+          </Menu.Item>
+        )}
+      </Menu>
     )
   }
 }
@@ -94,18 +62,13 @@ export class Sidebar extends Component {
 Sidebar.propTypes = {
   _id: PropTypes.number.isRequired,
   avatar: PropTypes.string,
-  hideAbout: PropTypes.bool
+  hideAbout: PropTypes.bool,
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   _id: state.authReducer._id,
   avatar: state.authReducer.userInfo.icon,
-  hideAbout: state.settingReducer.hideAbout
+  hideAbout: state.settingReducer.hideAbout,
 })
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    null
-  )(Sidebar)
-)
+export default withRouter(connect(mapStateToProps, null)(Sidebar))

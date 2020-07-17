@@ -8,12 +8,12 @@ import Extra from './Extra'
 
 class FM extends Component {
   state = {
-    audio: undefined
+    audio: undefined,
   }
 
-  handleAudioSpan = audio => {
+  handleAudioSpan = (audio) => {
     this.setState({
-      audio
+      audio,
     })
   }
 
@@ -21,7 +21,7 @@ class FM extends Component {
     const { isFetching } = this.props
     return (
       <article className="fm-region">
-        <Dimmer.Dimmable dimmed>
+        <Dimmer.Dimmable>
           <Dimmer className="fm-dimmer" active={isFetching} inverted>
             <Loader>加载中</Loader>
           </Dimmer>
@@ -35,14 +35,11 @@ class FM extends Component {
 }
 
 FM.propTypes = {
-  isFetching: PropTypes.bool.isRequired
+  isFetching: PropTypes.bool.isRequired,
 }
 
-const mapStateToProps = state => ({
-  isFetching: state.fmReducer.isFetching
+const mapStateToProps = (state) => ({
+  isFetching: state.fmReducer.isFetching,
 })
 
-export default connect(
-  mapStateToProps,
-  null
-)(FM)
+export default connect(mapStateToProps, null)(FM)

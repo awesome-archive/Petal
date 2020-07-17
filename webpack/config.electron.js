@@ -6,14 +6,20 @@ const isProd = process.env.NODE_ENV === 'production'
 module.exports = {
   mode: isProd ? 'production' : 'development',
   entry: {
-    main: './electron/main.dev'
+    main: './electron/main.dev',
+    background: './electron/background',
   },
   output: {
     path: MAINJS_OUTPUT_PATH,
-    filename: '[name].js'
+    filename: '[name].js',
   },
   target: 'electron-main',
   node: {
-    __dirname: false
-  }
+    __dirname: false,
+  },
+  resolve: {
+    alias: {
+      jsbi: path.resolve(__dirname, '../node_modules/jsbi/dist/jsbi-cjs.js'),
+    },
+  },
 }

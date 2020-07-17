@@ -1,101 +1,128 @@
-import { Tray, Menu, app } from 'electron'
+import { Menu, Tray, app, nativeImage } from 'electron'
+import { isDarwin, isLinux, isWin } from './platform'
+
+import { backgroundWindow } from './backgroundWin'
 import { mainWindow } from './win'
 
-let appIcon = null
 const resourcesFolder = __dirname + '/resources/'
 
-export const contextMenu = Menu.buildFromTemplate([
-  {
-    label: '打开',
-    enabled: false,
-    click() {
-      mainWindow.show()
-      contextMenu.items[0].enabled = false
-      contextMenu.items[1].enabled = true
-      if (process.platform === 'linux') {
-        appIcon.setContextMenu(contextMenu)
-      }
+export default {
+  tray: null,
+  contextMenu: null,
+  osxContextMenu: null,
+  init() {
+    if (isDarwin) {
+      initOSXContextMenu.bind(this)()
+    } else {
+      initNormalContextMenu.bind(this)()
     }
-  },
-  {
-    label: '隐藏',
-    enabled: true,
-    click() {
-      mainWindow.hide()
-      contextMenu.items[0].enabled = true
-      contextMenu.items[1].enabled = false
-      if (process.platform === 'linux') {
-        appIcon.setContextMenu(contextMenu)
-      }
-    }
-  },
-  { type: 'separator' },
-  {
-    label: '红心',
-    click() {
-      mainWindow.webContents.send('love')
-    }
-  },
-  {
-    label: '跳过',
-    click() {
-      mainWindow.webContents.send('skip')
-    }
-  },
-  {
-    label: '垃圾桶',
-    click() {
-      mainWindow.webContents.send('trash')
-    }
-  },
-  { type: 'separator' },
-  {
-    label: '贴附到状态栏',
-    type: 'checkbox',
-    checked: false,
-    enabled:
-      process.platform === 'win32' || process.platform === 'linux'
-        ? false
-        : true,
-    click() {
-      windowTopSwitch()
-    }
-  },
-  {
-    type: 'separator'
-  },
-  {
-    label: '退出',
-    click() {
-      app.quit()
-    }
-  }
-])
 
-function windowTopSwitch() {
-  let appIconRect = appIcon.getBounds()
-  let mainWindowRect = mainWindow.getBounds()
-  let currentItem = contextMenu.items[7]
-
-  if (currentItem.checked === true) {
-    if (process.platform === 'darwin') {
-      mainWindow.setPosition(
-        appIconRect.x - mainWindowRect.width / 2 + appIconRect.width / 2,
-        appIconRect.y
+    if (isDarwin) {
+      this.tray = new Tray(nativeImage.createEmpty())
+      this.tray.on('right-click', () => {
+        this.tray.popUpContextMenu(this.osxContextMenu)
+      })
+      this.tray.on('click', (event, bounds, position) => {
+        backgroundWindow.webContents.send('trayClick', { event, bounds, position })
+      })
+    } else if (isWin) {
+      this.tray = new Tray(`${resourcesFolder}win/icon.ico`)
+    } else if (isLinux) {
+      this.tray = new Tray(
+        process.env.PETAL_FORCE_OSX_ICON
+          ? `${resourcesFolder}osx/${process.env.PETAL_FORCE_OSX_ICON}/logo.png`
+          : `${resourcesFolder}linux/icon.png`
       )
     }
-  } else {
-    mainWindow.center()
-  }
+
+    if (!isDarwin) {
+      this.tray.setContextMenu(this.contextMenu)
+    }
+  },
+  setTrayImage(img) {
+    const bounds = this.tray.getBounds()
+    const Image = nativeImage.createFromDataURL(img).resize({
+      height: bounds ? bounds.height : 22,
+    })
+    this.tray.setImage(Image)
+  },
+  popUpContextMenu() {
+    this.tray.popUpContextMenu(this.osxContextMenu)
+  },
 }
 
-export default function createTray() {
-  if (process.platform === 'darwin') {
-    appIcon = new Tray(`${resourcesFolder}osx/icon.png`)
-  } else if (process.platform === 'win32') {
-    appIcon = new Tray(`${resourcesFolder}win/icon.ico`)
-  } else if (process.platform === 'linux') {
-    appIcon = new Tray(`${resourcesFolder}linux/icon.png`)
+function initNormalContextMenu() {
+  this.contextMenu = Menu.buildFromTemplate([
+    {
+      label: '切换显示/隐藏',
+      enabled: true,
+      click: mainWindowVisiableSwitch,
+    },
+    { type: 'separator' },
+    {
+      label: '切换暂停/开始',
+      click: () => mainWindow.webContents.send('pause'),
+    },
+    {
+      label: '红心',
+      click: () => mainWindow.webContents.send('love'),
+    },
+    {
+      label: '跳过',
+      click: () => mainWindow.webContents.send('skip'),
+    },
+    {
+      label: '垃圾桶',
+      click: () => mainWindow.webContents.send('trash'),
+    },
+    { type: 'separator' },
+    {
+      label: '退出',
+      click: app.quit,
+    },
+  ])
+}
+
+function initOSXContextMenu() {
+  this.osxContextMenu = Menu.buildFromTemplate([
+    {
+      label: '切换显示/隐藏',
+      enabled: true,
+      click: mainWindowVisiableSwitch,
+    },
+    { type: 'separator' },
+    {
+      label: '贴附到状态栏',
+      type: 'checkbox',
+      checked: false,
+      enabled: true,
+      click: () => {
+        // windowTopSwitch
+        let appIconRect = this.tray.getBounds()
+        let mainWindowRect = mainWindow.getBounds()
+        let currentItem = this.osxContextMenu.items[2]
+
+        if (currentItem.checked === true) {
+          if (isDarwin) {
+            mainWindow.setPosition(appIconRect.x - mainWindowRect.width / 2 + appIconRect.width / 2, appIconRect.y)
+          }
+        } else {
+          mainWindow.center()
+        }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: '退出',
+      click: app.quit,
+    },
+  ])
+}
+
+function mainWindowVisiableSwitch() {
+  if (mainWindow.isVisible()) {
+    mainWindow.hide()
+  } else {
+    mainWindow.show()
   }
-  appIcon.setContextMenu(contextMenu)
 }

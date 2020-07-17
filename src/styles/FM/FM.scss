@@ -1,10 +1,4 @@
 @import '../common';
-
-.fm-region {
-  @include VHCenter();
-  flex-direction: column;
-}
-
-.fm-dimmer {
-  background: transparent !important;
+.fm-region > .dimmable {
+  width: 100%;
 }

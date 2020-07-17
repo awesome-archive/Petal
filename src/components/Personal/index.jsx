@@ -1,11 +1,12 @@
+import { Button, Header, Item } from 'semantic-ui-react'
+import { Link, Route } from 'react-router-dom'
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { Header, Item, Button } from 'semantic-ui-react'
-import { connect } from 'react-redux'
-import { Route, Link } from 'react-router-dom'
-import { authRemove } from '../../actions/auth/apis'
+
 import Downloads from './Downloads'
+import PropTypes from 'prop-types'
 import Shares from './Shares'
+import { authRemove } from '../../actions/auth/apis'
+import { connect } from 'react-redux'
 
 class Personal extends Component {
   componentDidMount() {
@@ -31,13 +32,12 @@ class Personal extends Component {
         <div className="main-view">
           <Item.Group unstackable>
             <Item>
-              <Item.Image
-                className="avatar-icon"
-                size="tiny"
-                src={userInfo.icon}
-              />
+              <Item.Image className="avatar-icon" src={userInfo.icon} />
               <Item.Content>
-                <Item.Header as="a">{userInfo.name}</Item.Header>
+                <Item.Header as="a">
+                  <span>{userInfo.name}</span>
+                  {userInfo.pro_status && userInfo.pro_status === 'S' && <span className="pro-badget">PRO</span>}
+                </Item.Header>
                 <Item.Meta>
                   <p>已听 {userInfo.played_num} 首</p>
                   <p>红心 {userInfo.liked_num} 首</p>
@@ -46,9 +46,6 @@ class Personal extends Component {
               </Item.Content>
             </Item>
           </Item.Group>
-          <Button fluid negative onClick={this.handleAuthRemoveWrapper}>
-            退出登录
-          </Button>
           <div className="operations">
             <Link to="/personal/downloads">
               <Button basic size="small">
@@ -61,6 +58,9 @@ class Personal extends Component {
               </Button>
             </Link>
           </div>
+          <Button fluid negative onClick={this.handleAuthRemoveWrapper}>
+            退出登录
+          </Button>
         </div>
         <Route path="/personal/downloads" component={Downloads} />
         <Route path="/personal/shares" component={Shares} />
@@ -71,18 +71,15 @@ class Personal extends Component {
 
 Personal.propTypes = {
   userInfo: PropTypes.object.isRequired,
-  handleAuthRemove: PropTypes.func
+  handleAuthRemove: PropTypes.func,
 }
 
-const mapStateToProps = state => ({
-  userInfo: state.authReducer.userInfo
+const mapStateToProps = (state) => ({
+  userInfo: state.authReducer.userInfo,
 })
 
-const mapDispatchToProps = dispatch => ({
-  handleAuthRemove: callback => authRemove(dispatch, callback)
+const mapDispatchToProps = (dispatch) => ({
+  handleAuthRemove: (callback) => authRemove(dispatch, callback),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Personal)
+export default connect(mapStateToProps, mapDispatchToProps)(Personal)
